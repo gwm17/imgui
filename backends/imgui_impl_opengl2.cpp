@@ -20,7 +20,7 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
-//  2022-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
+//  2023-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
 //  2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11.
 //  2021-12-08: OpenGL: Fixed mishandling of the the ImDrawCmd::IdxOffset field! This is an old bug but it never had an effect until some internal rendering changes in 1.86.
 //  2021-06-29: Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX).
@@ -44,6 +44,13 @@
 #include <stddef.h>     // intptr_t
 #else
 #include <stdint.h>     // intptr_t
+#endif
+
+// Clang/GCC warnings with -Weverything
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-macros"                      // warning: macro is not used
+#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
 #endif
 
 // Include OpenGL header (without an OpenGL loader) requires a bit of fiddling
@@ -106,6 +113,7 @@ void    ImGui_ImplOpenGL2_Shutdown()
     ImGui_ImplOpenGL2_DestroyDeviceObjects();
     io.BackendRendererName = nullptr;
     io.BackendRendererUserData = nullptr;
+    io.BackendFlags &= ~ImGuiBackendFlags_RendererHasViewports;
     IM_DELETE(bd);
 }
 
@@ -324,3 +332,7 @@ static void ImGui_ImplOpenGL2_ShutdownPlatformInterface()
 {
     ImGui::DestroyPlatformWindows();
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
